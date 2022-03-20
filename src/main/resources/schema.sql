@@ -1,0 +1,4 @@
+CREATE TABLE Account(
+	ID INTEGER PRIMARY KEY,
+	Total INTEGER CHECK (Total >= 0)
+);
