@@ -3,6 +3,8 @@ package bank.service;
 import bank.dao.AccountRepository;
 import bank.entity.Account;
 import lombok.extern.log4j.Log4j2;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,12 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class BankTransferService {
 
 	private final AccountRepository dao;
-
+	@Autowired // Injection de dépendance par le constructeur
 	public BankTransferService(AccountRepository dao) {
 		this.dao = dao;
 	}
 
-	//@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void transferMoney(int fromId, int toId, int amount) {
 		log.debug("Début du transfert bancaire");
 		// si pas trouvé, lève NoSuchElementException
@@ -26,6 +27,9 @@ public class BankTransferService {
 		Account to = dao.findById(toId).orElseThrow();
 		from.debit(amount);
 		to.credit(amount);
+		// Pas nécessaire de faire dao.save(from) et dao.save(to)
+		// Sprind Data JPA sauvegarde automatiquement les entités modifiées
+		// si la transaction est validée
 		log.debug("Fin du transfert bancaire");
 	}
 	
