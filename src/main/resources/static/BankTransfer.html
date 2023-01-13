@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Transfert Bancaire</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+
+    <!-- On charge le moteur de template mustache https://mustache.github.io/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+
+    <script>
+        // Affiche les comptes dans le formulaire
+        function fetchAccounts() {
+            fetch("bankService/allAccounts")
+                .then(response => response.json())
+                .then(json => showAccounts(json))
+                .catch(error => showError({ ok: false, status: 500, data: { message: error.message } }));
+        }
+
+        /**
+         * Convertit les données d'un formulaire en JSON 
+         * @param {element} formElement le formulaire
+         */ 
+        function formToJson(formElement) {
+            let formData = {};
+            Array.from(formElement.querySelectorAll('input, select, textarea'))
+                .filter(element => element.name)
+                .forEach(element => {
+                    formData[element.name] = element.type === 'checkbox' ? element.checked : element.value;
+                });
+            return JSON.stringify(formData);
+        }
+
+        /**
+         * Initialise les champs d'un formulaire avec un contenu JSON
+         */
+        function jsonToForm(json, form) {
+            Object.keys(json).forEach(key => {
+                let element = form.querySelector(`[name=${key}]`);
+                if (element) {
+                    element.value = json[key];
+                }
+            });
+        }
+
+        /**
+         * Convertit les données d'un formulaire en application/x-www-form-urlencoded
+         */
+        function formToParams(formElement) {
+            return new URLSearchParams(new FormData(formElement)).toString()
+        }
+
+        // Fonction qui traite les résultats de la requête
+        function showAccounts(resultJson) {
+            // Le code source du template est dans la page
+            let template = document.getElementById("accountsTemplate").innerHTML;
+            // On combine le template avec le résultat de la requête
+            let generatedHtml = Mustache.render(template, { accounts: resultJson });
+            // On affiche le résultat dans la page
+            document.getElementById("accountsForm").innerHTML = generatedHtml;
+        }
+
+        // Fonction qui traite les erreurs de la requête
+        function showError(error) {
+            console.error(error);
+            alert("Erreur: " + error.data.message);
+        }
+
+        function transferMoney(event) {
+            event.preventDefault();
+            let form = document.getElementById("transferForm");
+            // var formData = formToJson(form);
+            let params = formToParams(form);
+            ajaxTransferMoney(params)
+                .then(result => {
+                    if (result.ok) {
+                        alert("Le transfert a été effectué avec succès");
+                        showAccounts(result.data);
+                    } else {
+                        showError(result);
+                    }
+                })
+                .catch(error => showError({ ok: false, status: 500, data: { message: error.message } }));
+        }
+
+        async function ajaxTransferMoney(params) {
+            const response = await fetch("bankService/transferMoney", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: params
+            });
+           const json = await response.json();
+           return { ok: response.ok, status: response.status, data: json }
+        }
+    </script>
+</head>
+
+<body onload="fetchAccounts()">
+    <h1>Transfert Bancaire</h1>
+    <div id="accountsForm">...Le formulaire va apparaître ici...</div>
+
+
+    <a href="/">Retour au menu</a>
+
+    <!-- Le template Mustache qui sert à formatter le formulaire -->
+    <script id="accountsTemplate" type="text/template">
+        <form id="transferForm">
+            <div>
+                <label for="fromAccount">Compte à débiter</label>
+                <select name="fromAccount" id="fromAccount">
+                    {{#accounts}}
+                    <option value="{{id}}">Compte n°:{{id}}, disponible: {{total}} €</option>
+                    {{/accounts}}
+                </select>
+            </div>
+            <div>
+                <label for="amount">Montant à transférer</label>
+                <input type="number" min="0" value="10" name="amount" id="amount" />
+            </div>
+
+            <div>
+                <label for="toAccount">Compte à créditer</label>
+                <select name="toAccount" id="toAccount">
+                    {{#accounts}}
+                    <option value="{{id}}">Compte n°:{{id}}, disponible: {{total}} €</option>
+                    {{/accounts}}
+                </select>
+            </div>
+            <input type="button" value="Transférer" onclick="transferMoney(event)">
+        </form>
+        </script>
+</body>
+
+</html>

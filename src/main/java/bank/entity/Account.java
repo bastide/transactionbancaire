@@ -1,28 +1,22 @@
 package bank.entity;
 
-import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import java.io.Serializable;
 
-
-@Entity
-@Data
-public class Account implements Serializable {
-	private static final long serialVersionUID = 2341696775275913561L;
-
-	@Id
+@Entity  // JPA
+@Getter @Setter @ToString @NoArgsConstructor // Lombok
+/**
+ * Un compte bancaire, avec sa balance et des opérations de crédit et débit.
+ */
+public class Account  {
+	@Id // La clé
 	private Integer id;
-
-	private Integer total;
-
-	public void credit(int amount) {
-		total += amount;
-	}
-	
-	public void debit(int amount) {
-		total -= amount;
-	}
-
+	@PositiveOrZero // Contrainte de validation JSR 303
+	private Integer balance;
 }
