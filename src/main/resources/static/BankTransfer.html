@@ -81,7 +81,7 @@
                         showError(result);
                     }
                 })
-                .catch(error => showError({ ok: false, status: 500, data: { message: error.message } }));
+                .catch(error => showError({ ok: false, status: 500, data: { message: error.title } }));
         }
 
         async function ajaxTransferMoney(params) {
