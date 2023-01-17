@@ -17,7 +17,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2 // @Log4j2 est une annotation qui permet d'ajouter un logger à la classe
 // On n'utilise pas @DataJpaTest, qui fait un "rollback" systématique après chaque test
 @SpringBootTest 
-class SuccessfulBankingTransactionTest {
+class CommitBankingTest {
 	static final int ID_DU_DEBITEUR = 0;
 	static final int ID_DU_CREDITEUR = 1;
 	static final int ID_INCONNU = 99;

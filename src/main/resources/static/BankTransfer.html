@@ -112,7 +112,7 @@
                 <label for="fromAccount">Compte à débiter</label>
                 <select name="fromAccount" id="fromAccount">
                     {{#accounts}}
-                    <option value="{{id}}">Compte n°:{{id}}, disponible: {{total}} €</option>
+                    <option value="{{id}}">Compte n°:{{id}}, disponible: {{balance}} €</option>
                     {{/accounts}}
                 </select>
             </div>
@@ -125,7 +125,7 @@
                 <label for="toAccount">Compte à créditer</label>
                 <select name="toAccount" id="toAccount">
                     {{#accounts}}
-                    <option value="{{id}}">Compte n°:{{id}}, disponible: {{total}} €</option>
+                    <option value="{{id}}">Compte n°:{{id}}, disponible: {{balance}} €</option>
                     {{/accounts}}
                 </select>
             </div>

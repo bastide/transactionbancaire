@@ -12,7 +12,7 @@ import lombok.ToString;
 @Entity  // JPA
 @Getter @Setter @ToString @NoArgsConstructor // Lombok
 /**
- * Un compte bancaire, avec sa balance et des opérations de crédit et débit.
+ * Un compte bancaire.
  */
 public class Account  {
 	@Id // La clé

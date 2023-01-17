@@ -1,7 +1,6 @@
 package bank;
 
 import jakarta.validation.ConstraintViolationException;
-import jakarta.xml.bind.ValidationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,9 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import bank.dao.AccountRepository;
 import bank.entity.Account;
 import bank.service.BankService;
-import bank.service.BankTransferException;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.transaction.TransactionSystemException;
+
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Log4j2 // @Log4j2 est une annotation qui permet d'ajouter un logger à la classe
 // On n'utilise pas @DataJpaTest, qui fait un "rollback" systématique après chaque test
 @SpringBootTest 
-class BankingTest {
+class RolllbackBankingTest {
 	static final int ID_DU_DEBITEUR = 0;
 	static final int ID_DU_CREDITEUR = 1;
 	static final int ID_INCONNU = 99;
@@ -65,37 +65,30 @@ class BankingTest {
 
 	}	
 	
-	@Test 
-	void unTransfertEchoueAvecUnMontantInsuffisant() {
+	@Test
+	void lesDecouvertsSontInterdits() {
 		log.info("On essaie de trop débiter");
-		// Given: les données définies dans 'data.sql'		
-
+		// Given: les données définies dans 'data.sql'
 		// When: On essaie de trop débiter
-		try {
-			service.transferMoney(ID_DU_DEBITEUR, ID_DU_CREDITEUR, 1 + debtorTotalBefore);
-			fail("On doit avoir une exception");
-		} catch (BankTransferException e) {
-			// On doit passer par ici
-			log.info("On a reçu l'exception {}", e.toString());
-		}
-		log.info("Fin d'un transfert non autorisé");
+		var ex = assertThrows(
+				TransactionSystemException.class,
+				() -> service.transferMoney(ID_DU_DEBITEUR, ID_DU_CREDITEUR, 1 + debtorTotalBefore),
+				"Découverts interdits !"
+		);
+		log.info("Exception: {}", ex.getMessage());
 	}
 
 
 	@Test 
 	void unTransfertEchoueAvecUnCrediteurInconnu() {
 		log.info("On essaie de faire un transfert vers un compte inconnu");
-		// Given: les données définies dans 'data.sql'				
-
+		// Given: les données définies dans 'data.sql'
 		// When: On essaie de faire un transfert vers un compte inconnu
-		try {
-			service.transferMoney(ID_DU_DEBITEUR, ID_INCONNU, 1 );
-			fail("On doit avoir une exception");
-		} catch (BankTransferException e) {
-			// On doit passer par ici			
-			log.info("On a reçu l'exception {}", e.toString());
-		}
-		log.info("Fin d'un transfert vers un compte inconnu");
+		assertThrows(
+				NoSuchElementException.class,
+				() -> service.transferMoney(ID_DU_DEBITEUR, ID_INCONNU, 1),
+				"Le compte crediteur est inconnu !"
+		);
 	}
 
 	@Test 
@@ -103,28 +96,22 @@ class BankingTest {
 		log.info("On essaie de débiter un compte inconnu");
 		// Given: les données définies dans 'data.sql'
 		// When: On essaie de faire un transfert depuis un compte inconnu
-		try {
-			service.transferMoney(ID_INCONNU, ID_DU_CREDITEUR, 1 );
-			fail("On doit avoir une exception");
-		} catch (BankTransferException e) {
-			// On doit passer par ici
-			log.info("On a reçu l'exception {}", e.toString());
-		}
-		log.debug("Après avoir essayé de débiter un compte inconnu");
+		assertThrows(
+				NoSuchElementException.class,
+				() -> service.transferMoney(ID_INCONNU, ID_DU_CREDITEUR, 1),
+				"Le compte crediteur est inconnu !"
+		);
 	}
 
 	@Test
 	void transfertEchoueSiDebiteurEtCrediteurIdentiques() {
 		log.info("On essaie un transfert avec debiteur = crediteur");
 		// When: Le débiteur et le créditeur sont identiques lors d'un transfert
-		try {
-			service.transferMoney(ID_DU_DEBITEUR, ID_DU_DEBITEUR, 1 );
-			fail("On doit avoir une exception");
-		} catch (BankTransferException e) {
-			// Then: On doit avoir une exception
-			log.info("On a reçu l'exception {}", e.toString());
-		}
-		log.info("Après avoir essayé de débiter le créditeur");
+		assertThrows(
+				IllegalArgumentException.class,
+				() -> service.transferMoney(ID_DU_DEBITEUR, ID_DU_DEBITEUR, 1),
+				"Les deux comptes doivent être différents !"
+		);
 	}
 
 	@Test
@@ -133,7 +120,8 @@ class BankingTest {
 		assertThrows(ConstraintViolationException.class,
 				() -> {
 					service.transferMoney(ID_DU_DEBITEUR, ID_DU_CREDITEUR, -1 );
-				}, "Le montant du transfert doit être positif");
+				}, "Le montant du transfert doit être positif"
+		);
 		log.info("Après avoir essayé de débiter le créditeur");
 	}
 }
