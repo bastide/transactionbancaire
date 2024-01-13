@@ -1,21 +1,12 @@
 package bank.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springdoc.api.ErrorMessage;
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.web.context.request.WebRequest;
 import bank.dao.AccountRepository;
 import bank.entity.Account;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.log4j.Log4j2;
 
@@ -39,7 +30,7 @@ public class BankService {
 
 	/**
 	 * Transfère un montant d'un compte à un autre.
-	 * 
+	 *
 	 * @param fromId l'identifiant du compte débiteur
 	 * @param toId   L'identifiant du compte créditeur
 	 * @param amount Le montant à transférer (positif)
