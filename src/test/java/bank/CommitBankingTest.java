@@ -56,8 +56,7 @@ class CommitBankingTest {
 		// Given: les données définies dans 'data.sql'
 		// When: on exécute un transfert bancaire autorisé
 		bankService.transferMoney(ID_DU_DEBITEUR, ID_DU_CREDITEUR, MONTANT_A_TRANSFERER);
-        assertEquals(journalEntriesBefore + 1, journalDao.count(), "Journal entries should have increased by 1");
-		log.info("Fin d'un transfert autorisé");
+ 		log.info("Fin d'un transfert autorisé");
 	}
 
 
@@ -73,5 +72,7 @@ class CommitBankingTest {
 				"Balance of debtor account should be decreased by the amount of the transfer");
 		assertEquals(balanceInitialeCrediteur + MONTANT_A_TRANSFERER, compteCrediteur.getBalance(),
 				"Balance of creditor account should be increased by the amount of the transfer");
+        // On doit avoir une entrée de plus dans le journal
+        assertEquals(journalEntriesBefore + 1, journalDao.count(), "Journal entries should have increased by 1");
 	}
 }
