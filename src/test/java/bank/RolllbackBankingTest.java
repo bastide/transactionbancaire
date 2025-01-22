@@ -92,7 +92,7 @@ class RolllbackBankingTest {
 		assertThrows(
 				NoSuchElementException.class,
 				() -> service.transferMoney(ID_DU_DEBITEUR, ID_INCONNU, 1),
-				"Le compte crediteur est inconnu !"
+				"Le compte créditeur est inconnu !"
 		);
 	}
 
