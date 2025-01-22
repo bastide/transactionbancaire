@@ -63,7 +63,7 @@ class CommitBankingTest {
 
 	@AfterEach()
 	void verifieTransfertOk() {
-		log.debug("Vérifications après la transaction");
+		log.info("Vérifications après la transaction");
 		// On rafraîchit les entités pour avoir les dernières mises à jour
 		// réalisées par la transaction de transfert
 		compteDebiteur   = dao.findById(ID_DU_DEBITEUR).orElseThrow();

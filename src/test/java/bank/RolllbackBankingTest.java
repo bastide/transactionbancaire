@@ -104,13 +104,13 @@ class RolllbackBankingTest {
 		assertThrows(
 				NoSuchElementException.class,
 				() -> service.transferMoney(ID_INCONNU, ID_DU_CREDITEUR, 1),
-				"Le compte crediteur est inconnu !"
+				"Le compte débiteur est inconnu !"
 		);
 	}
 
 	@Test
 	void transfertEchoueSiDebiteurEtCrediteurIdentiques() {
-		log.info("On essaie un transfert avec debiteur = crediteur");
+		log.info("On essaie un transfert avec débiteur = créditeur");
 		// When: Le débiteur et le créditeur sont identiques lors d'un transfert
 		assertThrows(
 				IllegalArgumentException.class,

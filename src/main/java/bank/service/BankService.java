@@ -43,7 +43,7 @@ public class BankService {
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void transferMoney(int fromId, int toId,
 			@Positive(message = "Le montant d'un transfert doit être positif") int amount) {
-		log.info("Début de la transaction de transfert bancaire");
+		log.info("Début du service de transfert bancaire");
 		if (fromId == toId) {
 			throw new IllegalArgumentException("Les deux comptes doivent être différents");
 		}
@@ -57,6 +57,7 @@ public class BankService {
 		to.setBalance(to.getBalance() + amount); // Crédit
 		// Inutile de faire dao.save(from) et dao.save(to)
 		// car les entités modifiées dans une transaction sont automatiquement sauvegardées
+        log.info("Fin du service de transfert bancaire");
 	}
 
 }
