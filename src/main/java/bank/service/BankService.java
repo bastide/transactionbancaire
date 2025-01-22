@@ -1,6 +1,9 @@
 package bank.service;
 
 import java.util.List;
+
+import bank.dao.JournalRepository;
+import bank.entity.Journal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,16 +19,18 @@ import lombok.extern.log4j.Log4j2;
 			// (ex: @Positive)
 public class BankService {
 
-	private final AccountRepository dao;
+	private final AccountRepository accountDao;
+    private final JournalRepository journalDao;
 
 	// @Autowired // Injection de dépendance par le constructeur
-	public BankService(AccountRepository dao) {
-		this.dao = dao;
-	}
+	public BankService(AccountRepository accountDao, JournalRepository journalDao) {
+		this.accountDao = accountDao;
+        this.journalDao = journalDao;
+    }
 
 	@Transactional(readOnly = true)
 	public List<Account> allAccounts() {
-		return dao.findAll();
+		return accountDao.findAll();
 	}
 
 	/**
@@ -43,14 +48,15 @@ public class BankService {
 			throw new IllegalArgumentException("Les deux comptes doivent être différents");
 		}
 		// On vérifie l'existence des comptes
-		Account from = dao.findById(fromId).orElseThrow();
-		Account to = dao.findById(toId).orElseThrow();
+		Account from = accountDao.findById(fromId).orElseThrow();
+		Account to = accountDao.findById(toId).orElseThrow();
 		// On effectue le transfert
 		from.setBalance(from.getBalance() - amount); // Débit
 		to.setBalance(to.getBalance() + amount); // Crédit
 		// Inutile de faire dao.save(from) et dao.save(to)
-		// car les entités modifiées dans une transaction sont automatiquement
-		// sauvegardées
+		// car les entités modifiées dans une transaction sont automatiquement sauvegardées
+        // On enregistre le transfert dans le journal
+        journalDao.save(new Journal(amount, from, to));
 	}
 
 }
