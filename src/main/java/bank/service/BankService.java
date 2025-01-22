@@ -50,13 +50,13 @@ public class BankService {
 		// On vérifie l'existence des comptes
 		Account from = accountDao.findById(fromId).orElseThrow();
 		Account to = accountDao.findById(toId).orElseThrow();
-		// On effectue le transfert
+        // On enregistre le transfert dans le journal
+        journalDao.save(new Journal(amount, from, to));
+        // On effectue le transfert
 		from.setBalance(from.getBalance() - amount); // Débit
 		to.setBalance(to.getBalance() + amount); // Crédit
 		// Inutile de faire dao.save(from) et dao.save(to)
 		// car les entités modifiées dans une transaction sont automatiquement sauvegardées
-        // On enregistre le transfert dans le journal
-        journalDao.save(new Journal(amount, from, to));
 	}
 
 }
